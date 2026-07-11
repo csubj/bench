@@ -1,0 +1,7 @@
+# Never manage these in the destination directory.
+# (Paths are relative to $HOME, i.e. the applied target.)
+
+# Repo-level docs / tooling live in the source repo, not $HOME.
+README.md
+LICENSE
+docs/**

@@ -1,0 +1,11 @@
+# Managed by chezmoi. Edit via: chezmoi edit ~/.gitconfig
+[user]
+	name = {{ .name }}
+	email = {{ .email }}
+[pull]
+	rebase = true
+[credential]
+	helper = cache
+[core]
+	editor = code --wait
+	# git also reads ~/.config/git/ignore by default (managed by chezmoi).

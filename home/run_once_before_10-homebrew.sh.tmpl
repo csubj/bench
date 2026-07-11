@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Ensure Homebrew exists before any package installation runs.
+# run_once: executes only once per machine (unless this file's contents change).
+set -euo pipefail
+
+if command -v brew >/dev/null 2>&1; then
+  exit 0
+fi
+
+echo "==> Installing Homebrew..."
+NONINTERACTIVE=1 /bin/bash -c \
+  "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Install Homebrew packages from .chezmoidata/packages.yaml.
+# run_onchange: re-runs whenever the rendered content below changes.
+set -euo pipefail
+
+if ! command -v brew >/dev/null 2>&1; then
+  if [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -x /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  else
+    echo "brew not found; skipping package install." >&2
+    exit 0
+  fi
+fi
+
+# Brewfile is generated from packages.yaml. Changing packages.yaml changes this
+# rendered script, which re-triggers the run_onchange hook.
+BREWFILE="$(mktemp -t bench-brewfile)"
+trap 'rm -f "$BREWFILE"' EXIT
+
+cat >"$BREWFILE" <<'BREWFILE_EOF'
+# shared personal baseline
+{{ range (dig "taps" (list) .common) -}}
+tap "{{ . }}"
+{{ end -}}
+{{ range (dig "brews" (list) .common) -}}
+brew "{{ . }}"
+{{ end -}}
+{{ range (dig "casks" (list) .common) -}}
+cask "{{ . }}"
+{{ end -}}
+BREWFILE_EOF
+
+echo "==> brew bundle (shared packages)"
+brew bundle --file="$BREWFILE"
+
+# Machine-local, untracked packages (e.g. azure-cli, vault). Same model as
+# ~/.config/zsh/local.zsh. Applied last so it can add machine-only formulae.
+if [[ -f "$HOME/.config/brew/Brewfile.local" ]]; then
+  echo "==> brew bundle (machine-local Brewfile.local)"
+  brew bundle --file="$HOME/.config/brew/Brewfile.local"
+fi

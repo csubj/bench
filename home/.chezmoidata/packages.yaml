@@ -1,0 +1,47 @@
+# Package inventory consumed by the run_onchange brew-bundle and pi-tools scripts.
+#
+# - common: shared personal baseline (installed on every machine)
+# - pi:     Pi coding agent ecosystem (npm globals + pi extensions)
+#
+# Machine- or employer-specific packages (internal taps, corp tools, k8s stacks)
+# do NOT belong here. Put those in the untracked ~/.config/brew/Brewfile.local.
+
+common:
+  brews:
+    - fzf
+    - ripgrep
+    - jq
+    - node
+    - nvm
+    - pnpm
+    - pyenv
+    - uv
+    - go
+    - starship
+    - zsh-autosuggestions
+    - zsh-syntax-highlighting
+    - shellcheck
+    - yamllint
+    - ffmpeg # optional: pi-web-access video frame extraction
+    - yt-dlp # optional: pi-web-access YouTube frame extraction
+  casks:
+    - ghostty
+    - font-jetbrains-mono-nerd-font
+    - 1password-cli
+    - claude-code
+    - sublime-text
+
+# Pi coding agent ecosystem.
+pi:
+  npm_globals:
+    - "@earendil-works/pi-coding-agent" # pi itself
+    - "@fission-ai/openspec" # openspec CLI
+    - context-mode # required global for the context-mode pi extension
+  packages: # installed via: pi install npm:<name>
+    - "@hypabolic/pi-hypa"
+    - pi-web-access
+    - pi-mcp-adapter
+    - context-mode
+    - pi-subagents
+  optional_packages:
+    - "@gotgenes/pi-permission-system" # pairs with pi-subagents for ask-prompt forwarding

@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Install the Pi coding agent ecosystem: Pi core, OpenSpec, npm global CLIs, and
+# Pi extensions. Idempotent and safe to re-run on every `chezmoi apply`.
+# run_onchange: re-runs whenever the rendered package lists below change.
+#
+# This script deliberately does NOT touch ~/.pi/agent/settings.json.
+set -euo pipefail
+
+if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+  echo "node/npm not found; skipping Pi tooling install." >&2
+  exit 0
+fi
+
+# --- 1. Pi core -------------------------------------------------------------
+if ! command -v pi >/dev/null 2>&1; then
+  echo "==> Installing Pi coding agent..."
+  npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+fi
+
+# --- 2. npm global CLIs -----------------------------------------------------
+# Rendered from packages.yaml .pi.npm_globals (openspec, context-mode, ...).
+npm_globals=(
+{{ range (dig "npm_globals" (list) .pi) -}}
+  "{{ . }}"
+{{ end -}}
+)
+if [[ ${#npm_globals[@]} -gt 0 ]]; then
+  echo "==> Installing npm global CLIs: ${npm_globals[*]}"
+  npm install -g "${npm_globals[@]}"
+fi
+
+# --- 3. Pi extensions -------------------------------------------------------
+# Rendered from packages.yaml .pi.packages. `pi install` is idempotent.
+if command -v pi >/dev/null 2>&1; then
+  pi_packages=(
+{{ range (dig "packages" (list) .pi) -}}
+    "{{ . }}"
+{{ end -}}
+  )
+  for p in "${pi_packages[@]}"; do
+    echo "==> pi install npm:${p}"
+    pi install "npm:${p}" || echo "  (pi install ${p} failed; continuing)" >&2
+  done
+
+  # Optional extras (best-effort).
+{{ range (dig "optional_packages" (list) .pi) -}}
+  pi install "npm:{{ . }}" || true
+{{ end -}}
+fi
+
+# --- 4. context-mode MCP server entry --------------------------------------
+# Merge into ~/.pi/agent/mcp.json without clobbering existing servers.
+PI_AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
+PI_MCP="${PI_AGENT_DIR}/mcp.json"
+if command -v jq >/dev/null 2>&1; then
+  mkdir -p "$PI_AGENT_DIR"
+  [[ -f "$PI_MCP" ]] || echo '{"mcpServers":{}}' >"$PI_MCP"
+  tmp="$(mktemp)"
+  jq '.mcpServers = ((.mcpServers // {}) + {"context-mode": {"command": "context-mode"}})' \
+    "$PI_MCP" >"$tmp" && mv "$tmp" "$PI_MCP"
+  echo "==> Registered context-mode in ${PI_MCP}"
+else
+  echo "jq not found; skipping context-mode MCP registration." >&2
+fi
+
+echo "==> Pi tooling ready. Verify with: pi   then   ctx stats"

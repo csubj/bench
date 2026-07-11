@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Scaffold machine-local, untracked config files with commented examples.
+# run_once: runs once per machine. Never overwrites existing files, so real
+# machine-local secrets/aliases/packages are preserved across re-applies.
+set -euo pipefail
+
+mkdir -p "$HOME/.config/zsh" "$HOME/.config/brew"
+
+LOCAL_ZSH="$HOME/.config/zsh/local.zsh"
+if [[ ! -f "$LOCAL_ZSH" ]]; then
+  echo "==> Scaffolding ${LOCAL_ZSH}"
+  cat >"$LOCAL_ZSH" <<'LOCAL_ZSH_EOF'
+# Machine-local zsh config: per-machine aliases and secrets.
+# NEVER committed. Sourced last by ~/.zshrc so it can override anything.
+
+# Put per-machine secrets, exports, and aliases here, e.g.:
+# export SOME_API_KEY="..."
+# alias deploy='...'
+#
+# On a work machine, use this for employer-specific env vars and aliases.
+# Keep anything org-specific out of the bench repo.
+LOCAL_ZSH_EOF
+  chmod 600 "$LOCAL_ZSH"
+fi
+
+BREWFILE_LOCAL="$HOME/.config/brew/Brewfile.local"
+if [[ ! -f "$BREWFILE_LOCAL" ]]; then
+  echo "==> Scaffolding ${BREWFILE_LOCAL}"
+  cat >"$BREWFILE_LOCAL" <<'BREWFILE_LOCAL_EOF'
+# Machine-local Homebrew packages. NEVER committed.
+# Applied by the run_onchange brew-bundle hook after the shared Brewfile.
+#
+# Use this on a work machine for employer-specific taps, internal tools, and
+# job-specific stacks. Keep anything org-specific out of the bench repo.
+#
+# Examples (uncomment what this machine needs):
+# tap "hashicorp/tap"
+# brew "hashicorp/tap/vault"
+# brew "azure-cli"
+# tap "your-org/private-tap"
+# brew "kubernetes-cli"
+# brew "helm"
+# brew "k9s"
+# brew "glab"
+# cask "freelens"
+BREWFILE_LOCAL_EOF
+fi

@@ -1,0 +1,41 @@
+# Managed by chezmoi. Edit via: chezmoi edit ~/.zshrc
+#
+# Machine-specific settings (secrets, per-machine aliases) do NOT live here. They live in the untracked
+# ~/.config/zsh/local.zsh, which is sourced at the end of this file.
+
+# Homebrew shellenv (Apple Silicon vs Intel).
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+# oh-my-zsh
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME=""            # prompt is handled by starship
+plugins=(git)
+[[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
+
+# Modular, version-controlled config: aliases, functions, and 1Password-injected
+# portable secrets (~/.config/zsh/secrets.zsh, mode 0600, not in git).
+if [[ -d "$HOME/.config/zsh" ]]; then
+  for _zf in "$HOME/.config/zsh"/*.zsh(N); do
+    source "$_zf"
+  done
+  unset _zf
+fi
+
+# zsh plugins from Homebrew.
+if command -v brew >/dev/null 2>&1; then
+  _brew_prefix="$(brew --prefix)"
+  source "$_brew_prefix/share/zsh-autosuggestions/zsh-autosuggestions.zsh" 2>/dev/null
+  source "$_brew_prefix/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" 2>/dev/null
+  unset _brew_prefix
+fi
+
+# Prompt.
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+
+# Machine-local overrides: per-machine aliases and secrets, never committed.
+# Scaffolded by chezmoi's run_once local-env script.
+[[ -f "$HOME/.config/zsh/local.zsh" ]] && source "$HOME/.config/zsh/local.zsh"
