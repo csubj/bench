@@ -1,0 +1,13 @@
+{{- /* Shared MCP base. Machine-only servers (tokens, corp endpoints) live in
+   the untracked ~/.config/mcp/mcp.local.json and are merged in when present.
+   Same model as Brewfile.local / local.zsh. */ -}}
+{{- $servers := dict -}}
+{{- $localPath := joinPath .chezmoi.homeDir ".config/mcp/mcp.local.json" -}}
+{{- if stat $localPath -}}
+{{- $local := fromJson (include $localPath) -}}
+{{- if hasKey $local "mcpServers" -}}
+{{- $servers = merge $servers (index $local "mcpServers") -}}
+{{- end -}}
+{{- end -}}
+{{ dict "mcpServers" $servers | toPrettyJson }}
+

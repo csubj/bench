@@ -14,6 +14,33 @@ if ! command -v brew >/dev/null 2>&1; then
   fi
 fi
 
+# Existing-machine hardening:
+# - no auto-update/cleanup mid-bundle (avoids Cellar lock + cache races)
+# - sequential installs (--jobs=1) avoid parallel upgrade lock failures
+# - --force overwrites conflicting prefix files (e.g. npm-global pnpm)
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_INSTALL_CLEANUP=1
+
+brew_prefix="$(brew --prefix)"
+
+brew_bundle() {
+  local file="$1"
+  brew bundle --file="$file" --force --jobs=1
+}
+
+# Retry once: transient brew lock/cache failures are common on busy machines.
+brew_bundle_retry() {
+  local label="$1"
+  local file="$2"
+  echo "==> brew bundle (${label})"
+  if brew_bundle "$file"; then
+    return 0
+  fi
+  echo "==> brew bundle retry (${label})"
+  brew_bundle "$file"
+}
+
+
 # Brewfile is generated from packages.yaml. Changing packages.yaml changes this
 # rendered script, which re-triggers the run_onchange hook.
 BREWFILE="$(mktemp -t bench-brewfile)"
@@ -22,22 +49,24 @@ trap 'rm -f "$BREWFILE"' EXIT
 cat >"$BREWFILE" <<'BREWFILE_EOF'
 # shared personal baseline
 {{ range (dig "taps" (list) .common) -}}
-tap "{{ . }}"
+tap "{{ . }}", trusted: true
 {{ end -}}
 {{ range (dig "brews" (list) .common) -}}
+{{ if eq . "pnpm" -}}
+brew "pnpm", link: :overwrite
+{{ else -}}
 brew "{{ . }}"
+{{ end -}}
 {{ end -}}
 {{ range (dig "casks" (list) .common) -}}
 cask "{{ . }}"
 {{ end -}}
 BREWFILE_EOF
 
-echo "==> brew bundle (shared packages)"
-brew bundle --file="$BREWFILE"
+brew_bundle_retry "shared packages" "$BREWFILE"
 
 # Machine-local, untracked packages (e.g. azure-cli, vault). Same model as
 # ~/.config/zsh/local.zsh. Applied last so it can add machine-only formulae.
 if [[ -f "$HOME/.config/brew/Brewfile.local" ]]; then
-  echo "==> brew bundle (machine-local Brewfile.local)"
-  brew bundle --file="$HOME/.config/brew/Brewfile.local"
+  brew_bundle_retry "machine-local Brewfile.local" "$HOME/.config/brew/Brewfile.local"
 fi

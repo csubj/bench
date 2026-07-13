@@ -90,3 +90,6 @@ See [docs/secrets.md](docs/secrets.md). Short version: nothing secret is
 committed. Portable secrets come from 1Password; machine-specific secrets,
 aliases, and packages live in untracked files (`~/.config/zsh/local.zsh`,
 `~/.config/brew/Brewfile.local`).
+
+To enable optional overlays (Grafana MCP, Pi Brave Search), see
+[docs/optional-config.md](docs/optional-config.md).

@@ -5,8 +5,10 @@ Nothing secret is ever committed to this repo. There are three tiers of config.
 ## 1. Versioned, non-secret (in git)
 
 Normal dotfiles: `~/.zshrc`, `~/.zshenv`, `~/.gitconfig`, Starship, Ghostty,
-general aliases, the shared MCP base (`~/.config/mcp/mcp.json`), and package
-lists. These are identical across all machines (modulo templated name/email).
+general aliases, the shared MCP/web-search bases, and package lists. These are
+identical across all machines (modulo templated name/email). Optional overlays
+(Grafana MCP, Brave Search) stay empty until you opt in — see
+[optional-config.md](optional-config.md).
 
 ## 2. Portable secrets — 1Password (rendered, not committed)
 
@@ -33,16 +35,22 @@ every machine.
 Anything that differs per machine (or is tied to one machine's accounts) lives
 in untracked files that chezmoi scaffolds once and never overwrites:
 
-| File                            | Holds                                                                      |
-| ------------------------------- | -------------------------------------------------------------------------- |
-| `~/.config/brew/Brewfile.local` | machine-only Homebrew packages (internal taps, k8s/cloud CLIs, corp casks) |
-| `~/.pi/agent/settings.json`     | Pi provider/auth config                                                    |
+| File                               | Holds                                                                      |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `~/.config/brew/Brewfile.local`    | machine-only Homebrew packages (internal taps, k8s/cloud CLIs, corp casks) |
+| `~/.config/mcp/mcp.local.json`     | machine-only MCP servers (tokens, corp endpoints); merged into `mcp.json`  |
+| `~/.pi/web-search.local.json`      | opt-in marker for Brave Search (key from 1Password at apply)               |
+| `~/.pi/agent/settings.json`        | Pi provider/auth config                                                    |
 
 - `~/.config/zsh/local.zsh` is sourced **last** by `~/.zshrc`, so it can override
   anything. Created (with commented examples) by
   `run_once_after_30-local-env.sh.tmpl`.
 - `~/.config/brew/Brewfile.local` is applied **after** the shared Brewfile by
   `run_onchange_before_20-brew-bundle.sh.tmpl`.
+- `~/.config/mcp/mcp.local.json` is scaffolded empty; fill in servers to enable.
+  How-to: [optional-config.md](optional-config.md).
+- `~/.pi/web-search.local.json` is **not** auto-created — touch it to opt in.
+  How-to: [optional-config.md](optional-config.md).
 - `~/.pi/agent/settings.json` is owned by Pi itself; the bootstrap never writes
   provider/auth config there.
 

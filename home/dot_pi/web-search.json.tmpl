@@ -1,0 +1,10 @@
+{{- /* Brave Search API key for Pi. Opt in per machine by creating
+   ~/.pi/web-search.local.json (presence enables; contents ignored).
+   Same optional-local model as mcp.local.json. */ -}}
+{{- if stat (joinPath .chezmoi.homeDir ".pi/web-search.local.json") -}}
+{
+  "braveApiKey": {{ onepasswordRead "op://homelab-cluster-secrets/brave-api-key/token" | quote }}
+}
+{{- else -}}
+{}
+{{- end -}}

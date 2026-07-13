@@ -4,7 +4,7 @@
 # machine-local secrets/aliases/packages are preserved across re-applies.
 set -euo pipefail
 
-mkdir -p "$HOME/.config/zsh" "$HOME/.config/brew"
+mkdir -p "$HOME/.config/zsh" "$HOME/.config/brew" "$HOME/.config/mcp"
 
 LOCAL_ZSH="$HOME/.config/zsh/local.zsh"
 if [[ ! -f "$LOCAL_ZSH" ]]; then
@@ -33,11 +33,13 @@ if [[ ! -f "$BREWFILE_LOCAL" ]]; then
 # Use this on a work machine for employer-specific taps, internal tools, and
 # job-specific stacks. Keep anything org-specific out of the bench repo.
 #
-# Examples (uncomment what this machine needs):
-# tap "hashicorp/tap"
+# Examples (uncomment what this machine needs).
+# Homebrew 6+ requires non-official taps to be trusted — use trusted: true
+# on the tap, or install fully-qualified names (user/tap/formula).
+# tap "hashicorp/tap", trusted: true
 # brew "hashicorp/tap/vault"
 # brew "azure-cli"
-# tap "your-org/private-tap"
+# tap "your-org/private-tap", trusted: true
 # brew "kubernetes-cli"
 # brew "helm"
 # brew "k9s"
@@ -45,3 +47,32 @@ if [[ ! -f "$BREWFILE_LOCAL" ]]; then
 # cask "freelens"
 BREWFILE_LOCAL_EOF
 fi
+
+MCP_LOCAL="$HOME/.config/mcp/mcp.local.json"
+if [[ ! -f "$MCP_LOCAL" ]]; then
+  echo "==> Scaffolding ${MCP_LOCAL}"
+  # Machine-local MCP servers (tokens, corp endpoints). NEVER committed.
+  # Merged into ~/.config/mcp/mcp.json by the mcp.json.tmpl template.
+  # Example:
+  # {
+  #   "mcpServers": {
+  #     "grafana": {
+  #       "command": "uvx",
+  #       "args": ["mcp-grafana"],
+  #       "env": {
+  #         "GRAFANA_URL": "https://grafana.example.com/",
+  #         "GRAFANA_SERVICE_ACCOUNT_TOKEN": "glsa_..."
+  #       }
+  #     }
+  #   }
+  # }
+  cat >"$MCP_LOCAL" <<'MCP_LOCAL_EOF'
+{
+  "mcpServers": {}
+}
+MCP_LOCAL_EOF
+  chmod 600 "$MCP_LOCAL"
+fi
+
+# Optional: enable Pi Brave Search (pulls key from 1Password at chezmoi apply).
+#   mkdir -p "$HOME/.pi" && touch "$HOME/.pi/web-search.local.json" && chmod 600 "$HOME/.pi/web-search.local.json"

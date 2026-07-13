@@ -1,6 +1,10 @@
 {{- $name := promptStringOnce . "name" "Full name" "Cj Buresch" -}}
 {{- $email := promptStringOnce . "email" "Git email" "cj@haltcatchfire.io" -}}
 
+# Persist --source from `chezmoi init --source …` / bootstrap.sh so later
+# `chezmoi apply` keeps using this clone instead of ~/.local/share/chezmoi.
+sourceDir = {{ .chezmoi.config.sourceDir | quote }}
+
 [data]
     name = {{ $name | quote }}
     email = {{ $email | quote }}

@@ -1,3 +1,10 @@
 font-family = JetBrainsMono Nerd Font
 font-size = 14
 theme = Catppuccin Mocha
+
+# Define the global shortcut to slide the terminal down (e.g., F12 or Ctrl+`)
+keybind = global:cmd+backquote=toggle_quick_terminal
+
+# Optional: Customize the position and look
+quick-terminal-position = top
+quick-terminal-screen = main
