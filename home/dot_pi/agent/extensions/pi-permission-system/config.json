@@ -1,20 +1,84 @@
 {
+  "$schema": "https://raw.githubusercontent.com/gotgenes/pi-packages/main/packages/pi-permission-system/schemas/permissions.schema.json",
+  "debugLog": false,
+  "permissionReviewLog": true,
+  "yoloMode": false,
   "permission": {
-    "*": "allow",
+    "*": "ask",
+
     "path": {
       "*": "allow",
       "*.env": "deny",
       "*.env.*": "deny",
-      "*.env.example": "allow"
+      "*.env.example": "allow",
+      "~/.ssh/*": "deny",
+      "*/id_rsa": "deny",
+      "*/id_ed25519": "deny",
+      "*.pem": "deny",
+      "*.key": "deny",
+      "*secrets*": "deny",
+      "*credentials*": "deny",
+      "*/mcp.local.json": "deny",
+      "*/auth.json": "deny"
     },
+
     "read": "allow",
+    "grep": "allow",
+    "find": "allow",
+    "ls": "allow",
     "edit": "allow",
     "write": "allow",
+
     "bash": {
-      "*": "allow",
+      "*": "ask",
+      "pwd": "allow",
+      "ls *": "allow",
+      "cat *": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "rg *": "allow",
+      "grep *": "allow",
+      "find *": "allow",
+      "fd *": "allow",
+      "wc *": "allow",
+      "stat *": "allow",
+      "file *": "allow",
+      "which *": "allow",
+      "git status": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "git show *": "allow",
+      "git blame *": "allow",
+      "git branch": "allow",
+      "git remote -v": "allow",
+      "hypa *": "allow",
+      "openspec *": "allow",
       "rm -rf *": "deny",
-      "sudo *": "ask"
+      "rm -fr *": "deny",
+      "sudo *": "ask",
+      "git push --force *": "ask",
+      "git push -f *": "ask"
     },
-    "external_directory": "ask"
+
+    "mcp": {
+      "*": "ask",
+      "mcp_status": "allow",
+      "mcp_list": "allow",
+      "mcp_search": "allow",
+      "mcp_describe": "allow",
+      "grafana": "allow",
+      "grafana:*": "allow"
+    },
+
+    "web_search": "allow",
+    "hypa_*": "allow",
+    "ctx_*": "ask",
+    "subagent": "ask",
+    "skill": { "*": "ask" },
+
+    "external_directory": {
+      "*": "ask",
+      "~/code/*": "allow"
+    }
   }
 }
