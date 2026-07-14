@@ -17,6 +17,7 @@ common:
     - pyenv
     - uv
     - go
+    - rustup # rust toolchain manager (installs cargo, rustc, rustfmt, clippy)
     - starship
     - zsh-autosuggestions
     - zsh-syntax-highlighting
