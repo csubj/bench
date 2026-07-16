@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Initialize Rust toolchain via rustup (run once).
-# Requires: brew install rustup (handled by run_onchange_before_20-brew-bundle.sh).
+# Initialize Rust toolchain via Homebrew's rustup (run once).
+# Homebrew installs `rustup` (proxies live in $(brew --prefix)/opt/rustup/bin) but
+# does NOT put rustup-init on PATH, so bootstrap the default toolchain here.
 set -euo pipefail
 
-if ! command -v rustup-init >/dev/null 2>&1; then
-  echo "rustup-init not found; skipping Rust toolchain setup." >&2
+if ! command -v rustup >/dev/null 2>&1; then
+  echo "rustup not found; skipping Rust toolchain setup." >&2
   exit 0
 fi
 
-# Skip if rustup is already initialized (stable toolchain present).
-if command -v rustup >/dev/null 2>&1 && rustup show active-toolchain &>/dev/null; then
+if rustup show active-toolchain &>/dev/null; then
   echo "Rust toolchain already initialized."
   exit 0
 fi
 
-echo "==> Initializing Rust toolchain (stable)"
-rustup-init -y --no-modify-path
+echo "==> Installing Rust stable toolchain"
+rustup default stable
 echo "Rust toolchain installed. Run 'rustup update' to update."

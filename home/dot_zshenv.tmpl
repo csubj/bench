@@ -6,3 +6,10 @@ export LANG="en_US.UTF-8"
 
 # User-local binaries (npm global bin, pipx, etc.).
 export PATH="$HOME/.local/bin:$PATH"
+
+# Rust: Homebrew's rustup keeps cargo/rustc proxies in its keg (not ~/.cargo/bin).
+for _rustup_bin in /opt/homebrew/opt/rustup/bin /usr/local/opt/rustup/bin "$HOME/.cargo/bin"; do
+  [[ -d "$_rustup_bin" ]] && PATH="$_rustup_bin:$PATH"
+done
+unset _rustup_bin
+export PATH
