@@ -6,5 +6,5 @@ theme = Catppuccin Mocha
 keybind = global:cmd+backquote=toggle_quick_terminal
 
 # Optional: Customize the position and look
-quick-terminal-position = top
+quick-terminal-position = center
 quick-terminal-screen = main
