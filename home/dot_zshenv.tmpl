@@ -13,3 +13,8 @@ for _rustup_bin in /opt/homebrew/opt/rustup/bin /usr/local/opt/rustup/bin "$HOME
 done
 unset _rustup_bin
 export PATH
+
+# 1Password SSH agent (symlinked to ~/.1password/agent.sock by chezmoi run_once hook).
+if [[ -S "$HOME/.1password/agent.sock" ]]; then
+  export SSH_AUTH_SOCK="$HOME/.1password/agent.sock"
+fi

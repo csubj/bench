@@ -16,6 +16,9 @@ ZSH_THEME=""            # prompt is handled by starship
 plugins=(git rust)
 [[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
+# 1Password shell plugins (e.g. gh). Configure once: op plugin init gh
+[[ -f "$HOME/.config/op/plugins.sh" ]] && source "$HOME/.config/op/plugins.sh"
+
 # Modular, version-controlled config: aliases, functions, and 1Password-injected
 # portable secrets (~/.config/zsh/secrets.zsh, mode 0600, not in git).
 if [[ -d "$HOME/.config/zsh" ]]; then

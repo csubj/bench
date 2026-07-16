@@ -1,0 +1,16 @@
+# GitHub authentication via 1Password.
+#
+# SSH: add your GitHub SSH key to 1Password and enable the SSH agent
+# (Settings -> Developer). ~/.ssh/config is managed by chezmoi.
+#
+# HTTPS / netrc: set netrc_op_ref to your GitHub PAT in 1Password.
+# The run_onchange netrc hook updates only the github.com stanza in ~/.netrc
+# and leaves other machine entries (e.g. corp git hosts) untouched.
+#
+# Find the op:// reference in 1Password: right-click the item field -> Copy Secret Reference.
+
+github:
+  # Example: "op://Private/GitHub Personal Access Token/credential"
+  netrc_op_ref: "op://Private/github/personal-dev"
+  # GitHub username for netrc login (PAT goes in the password field).
+  netrc_login: "csubj"

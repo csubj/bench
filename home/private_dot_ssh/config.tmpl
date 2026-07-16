@@ -1,0 +1,20 @@
+# Managed by chezmoi. Edit via: chezmoi edit ~/.ssh/config
+#
+# Requires 1Password app with SSH agent enabled:
+#   1Password -> Settings -> Developer -> "Use the SSH agent"
+#
+# The run_once hook symlinks the agent socket to ~/.1password/agent.sock.
+
+{{- if stat (joinPath .chezmoi.homeDir ".brev/ssh_config") }}
+Include "{{ .chezmoi.homeDir }}/.brev/ssh_config"
+{{- end }}
+
+# 1Password SSH agent (all hosts).
+Host *
+  IdentityAgent "~/.1password/agent.sock"
+
+# GitHub over SSH.
+Host github.com
+  HostName github.com
+  User git
+  IdentitiesOnly yes

@@ -4,10 +4,10 @@ Some managed files stay empty until you opt in on a given machine. That keeps
 `chezmoi apply` working on every host without requiring org tokens or 1Password
 items you do not have there.
 
-| Feature | Opt-in file | What happens |
-| ------- | ----------- | ------------ |
-| Extra MCP servers (e.g. Grafana) | `~/.config/mcp/mcp.local.json` | Merged into `~/.config/mcp/mcp.json` |
-| Pi Brave Search API key | `~/.pi/web-search.local.json` | Presence enables; key comes from 1Password |
+| Feature                          | Opt-in file                    | What happens                               |
+| -------------------------------- | ------------------------------ | ------------------------------------------ |
+| Extra MCP servers (e.g. Grafana) | `~/.config/mcp/mcp.local.json` | Merged into `~/.config/mcp/mcp.json`       |
+| Pi Brave Search API key          | `~/.pi/web-search.local.json`  | Presence enables; key comes from 1Password |
 
 Both files are **untracked** and never committed. After changing either, run
 `chezmoi apply`.
@@ -62,11 +62,19 @@ next apply. Tokens belong only in the local file — never in the repo.
 
 ## Pi Brave Search (`web-search.local.json`)
 
-The template (`home/dot_pi/web-search.json.tmpl`) renders `~/.pi/web-search.json`
-as `{}` unless the opt-in file exists. When it does, `chezmoi apply` reads the
-Brave Search API credential from 1Password:
+The template (`home/dot_pi/create_web-search.json.tmpl`) is a `create_` entry:
+chezmoi **seeds `~/.pi/web-search.json` once if it is missing, then never
+overwrites it.** This protects a hand-maintained local file (e.g. an
+`openaiApiKey` on a work machine) from being stomped on `chezmoi apply`.
+
+On the initial seed only, the file renders as `{}` unless the opt-in file
+exists. When it does, chezmoi reads the Brave Search API credential from
+1Password:
 
 `op://Private/Brave Search API/credential`
+
+Once `~/.pi/web-search.json` exists, edit it directly — chezmoi leaves it
+alone. To re-seed from the template, delete the file and re-apply.
 
 Requirements: `op` installed and signed in (`op signin`).
 

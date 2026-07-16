@@ -33,6 +33,8 @@ chezmoi init --apply csubj/bench
 | Prompt    | `home/dot_config/starship.toml`                         | `~/.config/starship.toml`              |
 | Terminal  | `home/dot_config/ghostty/config`                        | `~/.config/ghostty/config`             |
 | Git       | `home/dot_gitconfig.tmpl`, `home/dot_config/git/ignore` | `~/.gitconfig`, `~/.config/git/ignore` |
+| SSH       | `home/private_dot_ssh/config.tmpl`                      | `~/.ssh/config` (1Password SSH agent)  |
+| GitHub    | `home/.chezmoidata/auth.yaml`, netrc hook               | `~/.netrc` (github.com stanza only)    |
 | Packages  | `home/.chezmoidata/packages.yaml`                       | Homebrew (via `brew bundle`)           |
 | oh-my-zsh | `home/.chezmoiexternal.toml`                            | `~/.oh-my-zsh` (auto-updated)          |
 | Pi stack  | `home/run_onchange_after_50-pi-tools.sh.tmpl`           | Pi, OpenSpec, Pi extensions            |

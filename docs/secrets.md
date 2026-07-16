@@ -30,6 +30,47 @@ The template ships empty by default so `chezmoi apply` never fails on a missing
 item. Good candidates here: optional `pi-web-access` provider keys you want on
 every machine.
 
+## GitHub authentication (SSH + netrc)
+
+GitHub auth is configured via 1Password in two complementary ways:
+
+| Method | What it covers | Config |
+| ------ | -------------- | ------ |
+| **SSH** | `git push`/`pull` via `git@github.com:` | `~/.ssh/config` uses the 1Password SSH agent |
+| **netrc** | HTTPS tools that read `~/.netrc` | `github.com` stanza injected from 1Password at apply |
+
+### One-time setup
+
+1. **1Password app integration** — In 1Password → Settings → Developer:
+   - Turn on **Integrate with 1Password CLI**
+   - Turn on **Use the SSH agent**
+2. **SSH key** — Add (or import) your GitHub SSH key in 1Password.
+3. **HTTPS PAT (optional)** — Save a GitHub personal access token in 1Password,
+   then set `netrc_op_ref` in `home/.chezmoidata/auth.yaml`:
+
+   ```yaml
+   github:
+     netrc_op_ref: "op://Private/GitHub Personal Access Token/credential"
+     netrc_login: "csubj"
+   ```
+
+   Copy the `op://` reference from 1Password (right-click field → Copy Secret Reference).
+
+`chezmoi apply` symlinks the agent socket to `~/.1password/agent.sock`, manages
+`~/.ssh/config`, rewrites `https://github.com/` to SSH in `~/.gitconfig`, and
+updates only the `github.com` block in `~/.netrc` (other machine entries are
+preserved).
+
+Verify:
+
+```bash
+ssh -T git@github.com
+git ls-remote git@github.com:csubj/bench.git HEAD
+```
+
+Optional: configure the `gh` CLI plugin with `op plugin init gh` (sources
+`~/.config/op/plugins.sh`, already wired in `~/.zshrc`).
+
 ## 3. Machine-specific — untracked local files
 
 Anything that differs per machine (or is tied to one machine's accounts) lives

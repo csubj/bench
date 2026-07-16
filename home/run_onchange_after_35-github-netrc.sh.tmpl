@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Inject the github.com stanza into ~/.netrc from 1Password at apply time.
+# Only touches the github.com block; other machine entries are preserved.
+# run_onchange: re-runs when this script or auth.yaml changes.
+set -euo pipefail
+
+OP_REF="{{ dig "github" "netrc_op_ref" "" . }}"
+LOGIN="{{ dig "github" "netrc_login" "oauth2" . }}"
+
+if [[ -z "$OP_REF" ]]; then
+  echo "github.netrc_op_ref not set in auth.yaml; skipping netrc update."
+  exit 0
+fi
+
+if ! command -v op >/dev/null 2>&1; then
+  echo "op not found; skipping GitHub netrc update." >&2
+  exit 0
+fi
+
+PAT="$(op read "$OP_REF" 2>/dev/null)" || {
+  echo "Could not read GitHub credential from 1Password ($OP_REF); skipping netrc update." >&2
+  exit 0
+}
+
+NETRC="$HOME/.netrc"
+TMP="$(mktemp)"
+
+if [[ -f "$NETRC" ]]; then
+  awk '
+    /^machine github\.com/ { skip = 1; next }
+    skip && /^machine / { skip = 0 }
+    skip && /^[[:space:]]*$/ { next }
+    !skip { print }
+  ' "$NETRC" >"$TMP"
+else
+  : >"$TMP"
+fi
+
+{
+  printf '\nmachine github.com\n'
+  printf '    login %s\n' "$LOGIN"
+  printf '    password %s\n' "$PAT"
+} >>"$TMP"
+
+mv "$TMP" "$NETRC"
+chmod 600 "$NETRC"
+echo "Updated github.com entry in ~/.netrc from 1Password."
