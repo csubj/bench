@@ -5,3 +5,24 @@
     exact = true
     stripComponents = 1
     refreshPeriod = "168h"
+
+# ASD-STE100 Simplified Technical English skill: the full rule tables and worked
+# examples behind ~/.config/agent-rules/simplified-technical-english.md. Loaded
+# on demand, so it stays a skill instead of always-on rule text.
+#
+# Pinned to a commit for reproducibility. To take a newer upstream version,
+# replace the SHA in both URLs.
+#
+# ~/.agents/skills is read by Pi and by Cursor.
+[".agents/skills/asd-ste100"]
+    type = "archive"
+    url = "https://github.com/danyuchn/asd-ste100-skill/archive/d5ce157870cf9c41efd1d6e836706a2be3c7b9da.tar.gz"
+    exact = true
+    stripComponents = 1
+
+# Claude Code reads only its own skills directory.
+[".claude/skills/asd-ste100"]
+    type = "archive"
+    url = "https://github.com/danyuchn/asd-ste100-skill/archive/d5ce157870cf9c41efd1d6e836706a2be3c7b9da.tar.gz"
+    exact = true
+    stripComponents = 1

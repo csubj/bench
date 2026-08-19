@@ -38,6 +38,7 @@ chezmoi init --apply csubj/bench
 | Packages  | `home/.chezmoidata/packages.yaml`                       | Homebrew (via `brew bundle`)           |
 | oh-my-zsh | `home/.chezmoiexternal.toml`                            | `~/.oh-my-zsh` (auto-updated)          |
 | Pi stack  | `home/run_onchange_after_50-pi-tools.sh.tmpl`           | Pi, OpenSpec, Pi extensions            |
+| AI rules  | `home/dot_config/agent-rules/`                          | Cursor, Claude Code, Pi (see below)    |
 
 ## Extending on a work machine
 
@@ -74,6 +75,39 @@ machine with `/login` or your own provider.
 Custom pi-subagents you author under `~/.pi/agent/agents/*.md` are versioned via
 `home/dot_pi/agent/agents/`.
 
+## Shared agent writing rules
+
+Every harness gets the same writing rules, copied into its own config directory.
+Nothing is symlinked, so each harness reads a plain local file.
+
+Write the rules once, in `home/dot_config/agent-rules/*.md`. They apply to
+`~/.config/agent-rules/` on the machine, and
+`~/.local/bin/install-agent-rules` copies them into each harness:
+
+| Harness     | Destination                                        | Mechanism    |
+| ----------- | -------------------------------------------------- | ------------ |
+| Cursor      | `~/AGENTS.md`                                      | Marker block |
+| Cursor      | `~/.cursor/rules/simplified-technical-english.mdc` | Whole file   |
+| Claude Code | `~/.claude/CLAUDE.md`                              | Marker block |
+| Pi          | `~/.pi/agent/AGENTS.md`                            | Marker block |
+
+A marker block is delimited by `<!-- AGENT-RULES BEGIN ... -->`. The installer
+replaces only that block, so blocks that other tools own (for example nvcarps)
+stay intact. A harness that is not installed is skipped.
+
+`run_onchange_after_55-agent-rules.sh.tmpl` runs the installer on every
+`chezmoi apply` that changes a rule. Run `install-agent-rules` by hand after you
+edit `~/.config/agent-rules` directly.
+
+The current rule is [ASD-STE100 Simplified Technical
+English](https://en.wikipedia.org/wiki/Simplified_Technical_English): short,
+active, one-meaning sentences for comments, docs, and architecture text. The
+full rule tables and worked examples come from
+[danyuchn/asd-ste100-skill](https://github.com/danyuchn/asd-ste100-skill),
+pinned by commit in `.chezmoiexternal.toml` and installed as an on-demand skill
+in `~/.agents/skills/asd-ste100` (Pi, Cursor) and `~/.claude/skills/asd-ste100`
+(Claude Code). To take a newer upstream version, replace the SHA in both URLs.
+
 ## Daily use
 
 ```bash
@@ -85,6 +119,7 @@ chezmoi cd                 # jump to the source repo to commit/push
 - Add a **shared personal** brew tool: edit `home/.chezmoidata/packages.yaml`, then `chezmoi apply`.
 - Add a **work- or machine-only** brew tool: edit `~/.config/brew/Brewfile.local` (untracked).
 - Add a **Pi extension / npm CLI**: edit the `pi:` block in `packages.yaml`, then `chezmoi apply`.
+- Add an **agent writing rule**: add a file to `home/dot_config/agent-rules/`, then `chezmoi apply`.
 
 ## Secrets & machine-local config
 

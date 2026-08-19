@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Install the shared agent writing rules into every harness (Cursor, Claude, Pi).
+# The real work lives in ~/.local/bin/install-agent-rules so it can also be run
+# by hand after an edit to ~/.config/agent-rules.
+# run_onchange: re-runs whenever a rule file or the installer changes.
+#
+# rules hash: {{ range (glob (joinPath .chezmoi.sourceDir "dot_config/agent-rules/*.md")) }}{{ include . | sha256sum }} {{ end }}
+# tool hash:  {{ include "dot_local/bin/executable_install-agent-rules" | sha256sum }}
+set -euo pipefail
+
+exec "${HOME}/.local/bin/install-agent-rules"

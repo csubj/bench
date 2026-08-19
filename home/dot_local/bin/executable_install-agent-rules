@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+#
+# install-agent-rules - copy the shared writing rules into each agent harness.
+#
+# Reads every rule in ~/.config/agent-rules and writes the text into the global
+# instruction file of each harness that is installed: Cursor, Claude Code, and
+# Pi. Each harness gets a plain copy, not a symlink, so no harness has to follow
+# a link out of its own config directory.
+#
+# The rule text sits inside a marker block. Other generators (nvcarps, plugins)
+# keep their own blocks in the same file, and a re-run replaces only this block.
+# Edit the files in ~/.config/agent-rules, then run this tool again.
+#
+# Usage: install-agent-rules
+set -euo pipefail
+
+RULES_DIR="${AGENT_RULES_DIR:-$HOME/.config/agent-rules}"
+BEGIN_MARKER='<!-- AGENT-RULES BEGIN (managed by install-agent-rules) -->'
+END_MARKER='<!-- AGENT-RULES END -->'
+MDC_DESCRIPTION='Write comments, docs, and architecture text in Simplified Technical English (ASD-STE100)'
+
+log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
+warn() { printf '\033[1;33mwarning:\033[0m %s\n' "$*" >&2; }
+
+if ! compgen -G "${RULES_DIR}/*.md" >/dev/null; then
+  warn "no rules found in ${RULES_DIR}; nothing to install."
+  exit 0
+fi
+
+# Concatenate every rule into one body, separated by a blank line.
+RULE_BODY="$(mktemp)"
+trap 'rm -f "$RULE_BODY"' EXIT
+first=1
+for rule in "${RULES_DIR}"/*.md; do
+  [[ $first -eq 1 ]] || printf '\n' >>"$RULE_BODY"
+  cat "$rule" >>"$RULE_BODY"
+  first=0
+done
+
+# Print a file with the managed block and any trailing blank lines removed.
+strip_managed_block() {
+  awk -v b="$BEGIN_MARKER" -v e="$END_MARKER" '
+    index($0, b) { skip = 1; next }
+    index($0, e) { skip = 0; next }
+    !skip        { line[++n] = $0 }
+    END {
+      while (n > 0 && line[n] ~ /^[[:space:]]*$/) { n-- }
+      for (i = 1; i <= n; i++) { print line[i] }
+    }
+  ' "$1"
+}
+
+# Replace the destination only when the content differs, so mtimes stay stable.
+write_if_changed() {
+  local dest="$1" src="$2"
+  if cmp -s "$src" "$dest" 2>/dev/null; then
+    log "unchanged  ${dest/#$HOME/~}"
+    return
+  fi
+  mkdir -p "$(dirname "$dest")"
+  cp "$src" "$dest"
+  log "installed  ${dest/#$HOME/~}"
+}
+
+# Add the rules to a shared instruction file, keeping every other block intact.
+install_block() {
+  local dest="$1" kept tmp
+  tmp="$(mktemp)"
+  if [[ -s "$dest" ]]; then
+    kept="$(strip_managed_block "$dest")"
+    [[ -n "$kept" ]] && printf '%s\n\n' "$kept" >"$tmp"
+  fi
+  {
+    printf '%s\n' "$BEGIN_MARKER"
+    cat "$RULE_BODY"
+    printf '%s\n' "$END_MARKER"
+  } >>"$tmp"
+  write_if_changed "$dest" "$tmp"
+  rm -f "$tmp"
+}
+
+# Write a Cursor rule file. Cursor owns the whole file, so no markers are needed.
+install_mdc() {
+  local dest="$1" tmp
+  tmp="$(mktemp)"
+  {
+    printf -- '---\n'
+    printf 'description: %s\n' "$MDC_DESCRIPTION"
+    printf 'alwaysApply: true\n'
+    printf -- '---\n\n'
+    cat "$RULE_BODY"
+  } >"$tmp"
+  write_if_changed "$dest" "$tmp"
+  rm -f "$tmp"
+}
+
+# Cursor reads AGENTS.md from the current directory and every parent directory,
+# which includes $HOME. This is the global path that is confirmed to load.
+install_block "$HOME/AGENTS.md"
+
+# Cursor also reads ~/.cursor/rules. One help-center page documents that path and
+# another doc contradicts it, so treat this copy as a fallback, not the only one.
+if [[ -d "$HOME/.cursor" ]]; then
+  install_mdc "$HOME/.cursor/rules/simplified-technical-english.mdc"
+fi
+
+if [[ -d "$HOME/.claude" ]]; then
+  install_block "$HOME/.claude/CLAUDE.md"
+fi
+
+if [[ -d "$HOME/.pi/agent" ]]; then
+  install_block "$HOME/.pi/agent/AGENTS.md"
+fi
