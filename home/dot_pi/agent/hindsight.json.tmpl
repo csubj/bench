@@ -1,0 +1,35 @@
+{
+  "enabled": true,
+  "setupComplete": true,
+  "agentUse": "coding",
+  "scope": {
+    "mode": "domain-tagged",
+    "projectIdStrategy": "remote"
+  },
+  "hindsight": {
+    "baseUrl": "http://localhost:8888"
+  },
+  "banks": {
+    "project": {
+      "enabled": true,
+      "bankId": "coding-{{ .chezmoi.username }}",
+      "derive": "manual"
+    },
+    "user": {
+      "enabled": true,
+      "bankId": "life-{{ .chezmoi.username }}"
+    }
+  },
+  "retain": {
+    "queuePath": "{{ .chezmoi.homeDir }}/.pi/agent/hindsight/retain-queue.jsonl"
+  },
+  "recall": {
+    "roles": ["user"],
+    "contextTurns": 2,
+    "maxQueryChars": 400,
+    "topK": 6,
+    "storeLastRecall": true,
+    "storeLastRecallFailures": true,
+    "lastRecallPath": "{{ .chezmoi.homeDir }}/.pi/agent/hindsight/last-recall.json"
+  }
+}

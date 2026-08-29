@@ -40,10 +40,21 @@ pi:
     - "@fission-ai/openspec" # openspec CLI
     - context-mode # required global for the context-mode pi extension
   packages: # installed via: pi install npm:<name>
-    - "@hypabolic/pi-hypa"
     - pi-web-access
     - pi-mcp-adapter
-    - context-mode
     - pi-subagents
+    - pi-lens
+    - pi-background-tasks
+    - "@luxusai/pi-hindsight"
+    - "@narumitw/pi-plan-mode"
+    - "@narumitw/pi-statusline"
+    - "@narumitw/pi-usage"
+    - "@narumitw/pi-retry"
+    - "@narumitw/pi-worktree"
+    - "@narumitw/pi-sync"
+    - "@narumitw/pi-tool"
+    - "@narumitw/pi-analytics"
+  git_packages: # installed via: pi install git:<path>
+    - github.com/DietrichGebert/ponytail
   optional_packages:
     - "@gotgenes/pi-permission-system" # pairs with pi-subagents for ask-prompt forwarding

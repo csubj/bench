@@ -42,6 +42,17 @@ if command -v pi >/dev/null 2>&1; then
     pi install "npm:${p}" || echo "  (pi install ${p} failed; continuing)" >&2
   done
 
+  git_packages=(
+{{ range (dig "git_packages" (list) .pi) -}}
+    "{{ . }}"
+{{ end -}}
+  )
+  for p in "${git_packages[@]:-}"; do
+    [[ -n "$p" ]] || continue
+    echo "==> pi install git:${p}"
+    pi install "git:${p}" || echo "  (pi install ${p} failed; continuing)" >&2
+  done
+
   # Optional extras (best-effort).
 {{ range (dig "optional_packages" (list) .pi) -}}
   pi install "npm:{{ . }}" || true

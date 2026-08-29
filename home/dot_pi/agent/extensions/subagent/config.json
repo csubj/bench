@@ -1,0 +1,8 @@
+{
+  "toolDescriptionMode": "compact",
+  "scheduledRuns": {
+    "enabled": true,
+    "maxPending": 10,
+    "maxLatenessMs": 300000
+  }
+}
