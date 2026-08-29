@@ -74,5 +74,23 @@ MCP_LOCAL_EOF
   chmod 600 "$MCP_LOCAL"
 fi
 
+SSH_LOCAL="$HOME/.ssh/config.local"
+if [[ ! -f "$SSH_LOCAL" ]]; then
+  echo "==> Scaffolding ${SSH_LOCAL}"
+  # Machine-local ssh hosts (corp git servers, jump hosts). NEVER committed.
+  # ~/.ssh/config includes this file first, so a host here wins.
+  cat >"$SSH_LOCAL" <<'SSH_LOCAL_EOF'
+# Machine-local ssh hosts. Not managed by chezmoi.
+#
+# Host git.example.com
+#   HostName git.example.com
+#   User git
+#   Port 12051
+#   IdentityFile ~/.ssh/git.example.com.pub
+#   IdentitiesOnly yes
+SSH_LOCAL_EOF
+  chmod 600 "$SSH_LOCAL"
+fi
+
 # Optional: enable Pi Brave Search (pulls key from 1Password at chezmoi apply).
 #   mkdir -p "$HOME/.pi" && touch "$HOME/.pi/web-search.local.json" && chmod 600 "$HOME/.pi/web-search.local.json"

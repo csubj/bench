@@ -9,6 +9,10 @@
 Include "{{ .chezmoi.homeDir }}/.brev/ssh_config"
 {{- end }}
 
+# Machine-local hosts (corp git servers, jump hosts). Untracked, never
+# committed. ssh keeps the first value it reads, so this include is first.
+Include "{{ .chezmoi.homeDir }}/.ssh/config.local"
+
 # 1Password SSH agent (all hosts).
 Host *
   IdentityAgent "~/.1password/agent.sock"
